@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: radmir_db_container
+    environment:
+      POSTGRES_DB: radmir_db
+      POSTGRES_USER: radmir_user
+      POSTGRES_PASSWORD: radmir_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: radmir_bot_container
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/radmir_db
+      SPRING_DATASOURCE_USERNAME: radmir_user
+      SPRING_DATASOURCE_PASSWORD: radmir_pass
+      BOT_TOKEN: "8499031698:AAFLuwxDaH6kIeNmLYSQNuaa1Bs45mzt6Xk"
+    restart: always
+
+volumes:
+  postgres_data:
