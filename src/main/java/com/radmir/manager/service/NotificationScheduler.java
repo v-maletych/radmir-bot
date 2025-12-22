@@ -28,33 +28,64 @@ public class NotificationScheduler {
 
     private static final ZoneId KYIV_ZONE = ZoneId.of("Europe/Kiev");
 
-    // --- СТАРІ МЕТОДИ (Оплата) ---
-    @Scheduled(cron = "0 0 7 * * *")
-    @Scheduled(cron = "0 30 23 * * *")
-    public void checkPaymentExpirations() {
-        List<Payment> allPayments = (List<Payment>) paymentRepository.findAll();
+    // --- НОВА ЛОГІКА: Перевірка оплат (Записи + Огороди) ---
+    // Запускається щодня о 09:00 ранку
+    @Scheduled(cron = "0 0 9 * * *", zone = "Europe/Kiev")
+    public void checkDailyPayments() {
         LocalDate today = LocalDate.now(KYIV_ZONE);
-        for (Payment p : allPayments) {
-            if (p.getPaidUntil() == null) continue;
-            long daysLeft = ChronoUnit.DAYS.between(today, p.getPaidUntil());
-            if (daysLeft == 5) bot.sendNotification(p.getChatId(), "⚠️ <b>НАПОМИНАНИЕ</b>\nЗапись: <b>" + p.getName() + "</b>\nИстекает через 5 дней", p.getId());
-            if (daysLeft == 1) bot.sendNotification(p.getChatId(), "🚨 <b>ВНИМАНИЕ!</b>\nЗапись: <b>" + p.getName() + "</b>\nИстекает ЗАВТРА", p.getId());
+
+        // 1. ПЕРЕВІРКА ЗАПИСІВ (Payments)
+        List<Payment> payments = (List<Payment>) paymentRepository.findAll();
+        for (Payment p : payments) {
+            if (p.getPaidUntil() != null) {
+                long daysLeft = ChronoUnit.DAYS.between(today, p.getPaidUntil());
+
+                if (daysLeft > 0 && daysLeft <= 3) {
+                    // Нагадування за 3, 2, 1 дні
+                    bot.sendNotification(p.getChatId(),
+                            "⚠️ <b>Напоминание!</b>\nЗаканчивается оплата: '" + p.getName() + "'.\n⏳ Осталось дней: <b>" + daysLeft + "</b>",
+                            p.getId());
+                } else if (daysLeft == 0) {
+                    // День 0 (Сьогодні)
+                    bot.sendNotification(p.getChatId(),
+                            "🔥 <b>ВНИМАНИЕ!</b>\nЗапись: '" + p.getName() + "'.\nЗавтра будет -1 день оплаты - <b>оплати сегодня!!!</b>",
+                            p.getId());
+                } else if (daysLeft < 0) {
+                    // Прострочено
+                    bot.sendNotification(p.getChatId(),
+                            "❌ <b>ПРОСРОЧЕНО!</b>\nЗапись: '" + p.getName() + "'.\nДней долга: " + Math.abs(daysLeft),
+                            p.getId());
+                }
+            }
+        }
+
+        // 2. ПЕРЕВІРКА ОГОРОДІВ (Ogorods)
+        List<Ogorod> ogorods = (List<Ogorod>) ogorodRepository.findAll();
+        for (Ogorod o : ogorods) {
+            if (o.getPaidUntil() != null) {
+                long daysLeft = ChronoUnit.DAYS.between(today, o.getPaidUntil());
+
+                if (daysLeft > 0 && daysLeft <= 3) {
+                    // Нагадування за 3, 2, 1 дні
+                    bot.sendOgorodNotification(o.getChatId(),
+                            "⚠️ <b>Огород!</b>\nЗаканчивается оплата: '" + o.getTitle() + "'.\n⏳ Осталось дней: <b>" + daysLeft + "</b>",
+                            o.getId());
+                } else if (daysLeft == 0) {
+                    // День 0 (Сьогодні)
+                    bot.sendOgorodNotification(o.getChatId(),
+                            "🔥 <b>ВНИМАНИЕ!</b>\nОгород: '" + o.getTitle() + "'.\nЗавтра будет -1 день оплаты - <b>оплати сегодня!!!</b>",
+                            o.getId());
+                } else if (daysLeft < 0) {
+                    // Прострочено
+                    bot.sendOgorodNotification(o.getChatId(),
+                            "❌ <b>ОГОРОД ПРОСРОЧЕН!</b>\n'" + o.getTitle() + "'.\nМожет слететь! Дней долга: " + Math.abs(daysLeft),
+                            o.getId());
+                }
+            }
         }
     }
 
-    @Scheduled(cron = "0 0 7 * * *")
-    @Scheduled(cron = "0 30 23 * * *")
-    public void checkOgorodExpirations() {
-        List<Ogorod> allOgorods = (List<Ogorod>) ogorodRepository.findAll();
-        LocalDate today = LocalDate.now(KYIV_ZONE);
-        for (Ogorod o : allOgorods) {
-            if (o.getPaidUntil() == null) continue;
-            long daysLeft = ChronoUnit.DAYS.between(today, o.getPaidUntil());
-            if (daysLeft <= 3 && daysLeft > 1) bot.sendOgorodNotification(o.getChatId(), "⚠️ <b>ОГОРОД: ОПЛАТА</b>\nName: <b>" + o.getTitle() + "</b>\nИстекает через " + daysLeft + " дн.", o.getId());
-            if (daysLeft == 1) bot.sendOgorodNotification(o.getChatId(), "🚨 <b>ОГОРОД: ЗАВТРА КОНЕЦ ОПЛАТЫ</b>\nName: <b>" + o.getTitle() + "</b>", o.getId());
-        }
-    }
-
+    // --- СТАРИЙ МЕТОД: КЛІЄНТИ (Залишив без змін, як у тебе було) ---
     @Scheduled(cron = "0 0 * * * *")
     public void checkClientExpirations() {
         List<ClientRecord> clients = (List<ClientRecord>) clientRepository.findAll();
@@ -72,7 +103,7 @@ public class NotificationScheduler {
         }
     }
 
-    // --- НОВИЙ МЕТОД: УРОЖАЙ (Кожну хвилину) ---
+    // --- ВАЖЛИВИЙ МЕТОД: УРОЖАЙ (Залишив повністю без змін) ---
     @Scheduled(cron = "0 * * * * *")
     public void checkHarvestCycles() {
         List<Ogorod> ogorods = (List<Ogorod>) ogorodRepository.findAll();
@@ -82,28 +113,26 @@ public class NotificationScheduler {
             // Перевіряємо лише ті, що ростуть
             if ("GROWING".equals(o.getHarvestState())) {
 
-                // 1. Скільки часу пройшло з останнього "руху" (посадки або поливу)
+                // 1. Скільки часу пройшло з останнього "руху"
                 long minutesSinceLastWater = ChronoUnit.MINUTES.between(o.getLastWateringTime(), now);
 
-                // 2. Поточний прогрес = Накопичено раніше + Те, що пройшло зараз
+                // 2. Поточний прогрес
                 long currentTotalProgress = (o.getAccumulatedGrowthMinutes() == null ? 0 : o.getAccumulatedGrowthMinutes()) + minutesSinceLastWater;
 
                 // Перевірка 1: Чи виріс урожай повністю?
                 if (currentTotalProgress >= o.getGrowthTimeMinutes()) {
                     o.setHarvestState("READY");
-                    o.setAccumulatedGrowthMinutes((int) currentTotalProgress); // Фіксуємо фінал
+                    o.setAccumulatedGrowthMinutes((int) currentTotalProgress);
                     ogorodRepository.save(o);
                     bot.sendMessage(o.getChatId(), "🌽 <b>УРОЖАЙ ГОТОВ!</b>\n🏡 Огород: <b>" + o.getTitle() + "</b>\n💰 Жмите «Собрать» в меню!");
-                    continue; // Переходимо до наступного, цей вже все
+                    continue;
                 }
 
                 // Перевірка 2: Чи пора поливати?
                 if (minutesSinceLastWater >= o.getWateringIntervalMinutes()) {
                     // Ставимо на ПАУЗУ
                     o.setHarvestState("WAITING_WATER");
-                    // Зберігаємо прогрес, який встиг нарости до цього моменту
                     o.setAccumulatedGrowthMinutes((int) ((o.getAccumulatedGrowthMinutes() == null ? 0 : o.getAccumulatedGrowthMinutes()) + minutesSinceLastWater));
-                    // Час lastWateringTime не оновлюємо тут, він оновиться коли юзер натисне "Полив"
                     ogorodRepository.save(o);
                     bot.sendMessage(o.getChatId(), "💧 <b>НУЖЕН ПОЛИВ!</b>\n🏡 Огород: <b>" + o.getTitle() + "</b>\n⏸ Рост остановлен пока не польете.");
                 }

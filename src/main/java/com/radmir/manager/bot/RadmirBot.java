@@ -698,7 +698,10 @@ public class RadmirBot extends TelegramLongPollingBot {
     }
 
     private void startOgorodExtension(Long chatId, String data, Integer msgId, String text) {
-        extensionOgorodIdMap.put(chatId, Long.parseLong(data.split("_")[2])); userStateMap.put(chatId, UserState.AWAITING_OGOROD_EXTEND_DAYS); sendMessageWithCancel(chatId, "На сколько дней продлить оплату?");
+        extensionOgorodIdMap.put(chatId, Long.parseLong(data.split("_")[2]));
+        userStateMap.put(chatId, UserState.AWAITING_OGOROD_EXTEND_DAYS);
+        // Змінено текст запитання:
+        sendMessageWithCancel(chatId, "Введите новое значение (на сколько щас оплачено?):");
     }
 
     private void sendOgorodEditOptions(Long chatId, long id) {
@@ -908,7 +911,7 @@ public class RadmirBot extends TelegramLongPollingBot {
     private void startAddingPayment(Long chatId) { paymentDraftMap.put(chatId, new Payment()); userStateMap.put(chatId, UserState.AWAITING_NAME); sendMessageWithCancel(chatId, "Введите название (например: Дом):"); }
     private void startDeletingPayment(Long chatId) { sendMessageWithCancel(chatId, "Введите ID записи для удаления:"); userStateMap.put(chatId, UserState.AWAITING_DELETE_ID); }
     private void startEditingPayment(Long chatId) { sendMessageWithCancel(chatId, "Введите ID записи для редактирования:"); userStateMap.put(chatId, UserState.AWAITING_EDIT_ID); }
-    private void startExtension(Long chatId, String data, Integer msgId, String text) { extensionPaymentIdMap.put(chatId, Long.parseLong(data.split("_")[1])); userStateMap.put(chatId, UserState.AWAITING_EXTENSION_DAYS); sendMessageWithCancel(chatId, "Сколько дней добавить?"); }
+    private void startExtension(Long chatId, String data, Integer msgId, String text) {extensionPaymentIdMap.put(chatId, Long.parseLong(data.split("_")[1])); userStateMap.put(chatId, UserState.AWAITING_EXTENSION_DAYS); sendMessageWithCancel(chatId, "Введите новое значение (на сколько щас оплачено?):");}
     private void handleEditFieldChoice(Long chatId, String data, Integer msgId) { String f = data.split("_")[1]; editFieldMap.put(chatId, f); editPaymentIdMap.put(chatId, Long.parseLong(data.split("_")[2])); userStateMap.put(chatId, UserState.AWAITING_EDIT_VALUE); if(f.equals("date")) sendMessageWithCancel(chatId, "Введите дату покупки (ГГГГ-ММ-ДД):"); else sendMessageWithCancel(chatId, "Введите новое значение:"); }
     private void processEditValue(Long chatId, String text) { Payment p = paymentRepository.findById(editPaymentIdMap.get(chatId)).get(); String f = editFieldMap.get(chatId); if(f.equals("name")) p.setName(text); if(f.equals("price")) p.setPrice(parsePrice(text)); if(f.equals("days")) { int d = Integer.parseInt(text); p.setDaysPaid(d); p.setPaidUntil(LocalDate.now(KYIV_ZONE).plusDays(d)); } if(f.equals("date")) p.setPurchaseDate(LocalDate.parse(text)); paymentRepository.save(p); resetUserState(chatId); sendMessage(chatId, "✅ Запись обновлена."); showMainMenu(chatId, "Меню:"); }
     private void sendEditOptions(Long chatId, Long id) { editPaymentIdMap.put(chatId, id); SendMessage m = new SendMessage(); m.setChatId(chatId); m.setText("Что менять?"); InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> r = new ArrayList<>(); List<InlineKeyboardButton> r1 = new ArrayList<>(); r1.add(createBtn("Название", "edit_name_"+id)); r1.add(createBtn("Дата покупки", "edit_date_"+id)); List<InlineKeyboardButton> r2 = new ArrayList<>(); r2.add(createBtn("Цена", "edit_price_"+id)); r2.add(createBtn("Дни оплаты", "edit_days_"+id)); r.add(r1); r.add(r2); mk.setKeyboard(r); m.setReplyMarkup(mk); try { execute(m); } catch (Exception e) {} }
