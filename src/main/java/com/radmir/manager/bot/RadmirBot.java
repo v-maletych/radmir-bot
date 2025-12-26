@@ -59,7 +59,7 @@ public class RadmirBot extends TelegramLongPollingBot {
     private Map<Long, String> editFieldMap = new HashMap<>();
     private Map<Long, Long> editClientIdMap = new HashMap<>();
     private Map<Long, Long> editOgorodIdMap = new HashMap<>();
-    private Map<Long, Long> terminateClientIdMap = new HashMap<>(); // ID клієнта для завершення
+    private Map<Long, Long> terminateClientIdMap = new HashMap<>();
 
     // Harvest Temp
     private Map<Long, Long> harvestParamOgorodId = new HashMap<>();
@@ -144,7 +144,7 @@ public class RadmirBot extends TelegramLongPollingBot {
                     case "💧 Полил": performWatering(chatId); break;
                     case "🚜 Собрал": collectHarvest(chatId); break;
                     case "⏱ Состояние": showHarvestStatus(chatId); break;
-                    case "🔄 Сброс": showHarvestResetMenu(chatId); break; // NEW
+                    case "🔄 Сброс": showHarvestResetMenu(chatId); break;
                     case "⚙️ Параметры": setupHarvestParams(chatId); break;
                     case "📈 Статистика урожая": startHarvestStatistics(chatId); break;
 
@@ -155,7 +155,7 @@ public class RadmirBot extends TelegramLongPollingBot {
                     case "📥 Скачать Excel": generateClientsExcel(chatId, null); break;
                     case "✏️ Ред. клиента": startEditingClientInput(chatId); break;
                     case "❌ Удалить клиента": startDeletingClient(chatId); break;
-                    case "🛑 Завершить досрочно": startTerminatingClient(chatId); break; // NEW
+                    case "🛑 Завершить досрочно": startTerminatingClient(chatId); break;
 
                     default: showMainMenu(chatId, "Выберите действие из меню.");
                 }
@@ -176,17 +176,24 @@ public class RadmirBot extends TelegramLongPollingBot {
             harvestParamOgorodId.put(chatId, oid);
             userStateMap.put(chatId, UserState.AWAITING_HARVEST_GROWTH_TIME);
 
-            // ЗМІНА: Додаємо кнопку "02:50"
-            SendMessage m = new SendMessage(); m.setChatId(chatId); m.setText("Введите время роста (ЧЧ:ММ), например 3:30\nИли нажмите кнопку:");
-            ReplyKeyboardMarkup mk = new ReplyKeyboardMarkup(); mk.setResizeKeyboard(true);
+            // КНОПКА "02:50" (ТУТ ВОНА Є)
+            SendMessage m = new SendMessage();
+            m.setChatId(chatId);
+            m.setText("Введите время роста (ЧЧ:ММ), например 3:30\nИли нажмите кнопку:");
+            ReplyKeyboardMarkup mk = new ReplyKeyboardMarkup();
+            mk.setResizeKeyboard(true);
             List<KeyboardRow> kb = new ArrayList<>();
             KeyboardRow r1 = new KeyboardRow(); r1.add("02:50");
             KeyboardRow r2 = new KeyboardRow(); r2.add("🔙 Отмена");
-            kb.add(r1); kb.add(r2); mk.setKeyboard(kb); m.setReplyMarkup(mk); try { execute(m); } catch (Exception e) {}
+            kb.add(r1); kb.add(r2);
+            mk.setKeyboard(kb);
+            m.setReplyMarkup(mk);
+            try { execute(m); } catch (Exception e) {}
         }
         else if (data.startsWith("h_plant_")) processPlanting(chatId, Long.parseLong(data.split("_")[2]));
         else if (data.startsWith("h_water_")) processWateringConfirm(chatId, Long.parseLong(data.split("_")[2]));
         else if (data.startsWith("h_collect_")) processCollectingConfirm(chatId, Long.parseLong(data.split("_")[2]));
+
             // Harvest Reset
         else if (data.equals("h_reset_all")) processHarvestReset(chatId, -1L);
         else if (data.startsWith("h_reset_")) processHarvestReset(chatId, Long.parseLong(data.split("_")[2]));
@@ -271,13 +278,19 @@ public class RadmirBot extends TelegramLongPollingBot {
                     ogorodRepository.save(oH1);
                     userStateMap.put(chatId, UserState.AWAITING_HARVEST_WATER_TIME);
 
-                    // ЗМІНА: Кнопка "35"
-                    SendMessage mWater = new SendMessage(); mWater.setChatId(chatId); mWater.setText("Введите интервал полива в минутах (целое число):");
-                    ReplyKeyboardMarkup mkWater = new ReplyKeyboardMarkup(); mkWater.setResizeKeyboard(true);
+                    // КНОПКА "35" (ТУТ ВОНА Є)
+                    SendMessage mWater = new SendMessage();
+                    mWater.setChatId(chatId);
+                    mWater.setText("Введите интервал полива в минутах (целое число):");
+                    ReplyKeyboardMarkup mkWater = new ReplyKeyboardMarkup();
+                    mkWater.setResizeKeyboard(true);
                     List<KeyboardRow> kbWater = new ArrayList<>();
                     KeyboardRow rWater1 = new KeyboardRow(); rWater1.add("35");
                     KeyboardRow rWater2 = new KeyboardRow(); rWater2.add("🔙 Отмена");
-                    kbWater.add(rWater1); kbWater.add(rWater2); mkWater.setKeyboard(kbWater); mWater.setReplyMarkup(mkWater); try { execute(mWater); } catch (Exception e) {}
+                    kbWater.add(rWater1); kbWater.add(rWater2);
+                    mkWater.setKeyboard(kbWater);
+                    mWater.setReplyMarkup(mkWater);
+                    try { execute(mWater); } catch (Exception e) {}
                     break;
 
                 case AWAITING_HARVEST_WATER_TIME:
@@ -286,14 +299,21 @@ public class RadmirBot extends TelegramLongPollingBot {
                     ogorodRepository.save(oH2);
                     userStateMap.put(chatId, UserState.AWAITING_HARVEST_PRICE);
 
-                    // ЗМІНА: Кнопка "193.950"
-                    SendMessage mPrice = new SendMessage(); mPrice.setChatId(chatId); mPrice.setText("Введите прибыль за один сбор урожая:");
-                    ReplyKeyboardMarkup mkPrice = new ReplyKeyboardMarkup(); mkPrice.setResizeKeyboard(true);
+                    // КНОПКА "193.950" (ТУТ ВОНА Є)
+                    SendMessage mPrice = new SendMessage();
+                    mPrice.setChatId(chatId);
+                    mPrice.setText("Введите прибыль за один сбор урожая:");
+                    ReplyKeyboardMarkup mkPrice = new ReplyKeyboardMarkup();
+                    mkPrice.setResizeKeyboard(true);
                     List<KeyboardRow> kbPrice = new ArrayList<>();
                     KeyboardRow rPrice1 = new KeyboardRow(); rPrice1.add("193.950");
                     KeyboardRow rPrice2 = new KeyboardRow(); rPrice2.add("🔙 Отмена");
-                    kbPrice.add(rPrice1); kbPrice.add(rPrice2); mkPrice.setKeyboard(kbPrice); mPrice.setReplyMarkup(mkPrice); try { execute(mPrice); } catch (Exception e) {}
+                    kbPrice.add(rPrice1); kbPrice.add(rPrice2);
+                    mkPrice.setKeyboard(kbPrice);
+                    mPrice.setReplyMarkup(mkPrice);
+                    try { execute(mPrice); } catch (Exception e) {}
                     break;
+
                 case AWAITING_HARVEST_PRICE:
                     Ogorod oH3 = ogorodRepository.findById(harvestParamOgorodId.get(chatId)).get();
                     oH3.setHarvestProfit(parsePrice(text));
@@ -327,7 +347,6 @@ public class RadmirBot extends TelegramLongPollingBot {
                     long deleteOgId = Long.parseLong(text); Optional<Ogorod> ogDel = ogorodRepository.findById(deleteOgId);
                     if (ogDel.isEmpty() || !ogDel.get().getChatId().equals(chatId)) { sendMessageWithCancel(chatId, "❌ Огород не найден. ID:"); return; }
 
-                    // --- REQUIREMENT 2: DELETE OGOROD = EXPIRE CLIENTS ---
                     List<ClientRecord> clientsOnOgorod = clientRepository.findAllByChatId(chatId).stream()
                             .filter(c -> c.getOgorodName().equals(ogDel.get().getTitle()) && c.getEndDate().isAfter(LocalDateTime.now(KYIV_ZONE)))
                             .collect(Collectors.toList());
@@ -337,8 +356,6 @@ public class RadmirBot extends TelegramLongPollingBot {
                         clientRepository.save(c);
                         sendMessage(chatId, "ℹ️ Аренда клиента <b>" + c.getNickname() + "</b> завершена (огород удален).");
                     }
-                    // ---------------------------------------------------
-
                     ogorodRepository.deleteById(deleteOgId); resetUserState(chatId); sendMessage(chatId, "✅ Огород удален."); showOgorodSubMenu(chatId); break;
 
                 case AWAITING_OGOROD_EDIT_ID:
@@ -361,7 +378,7 @@ public class RadmirBot extends TelegramLongPollingBot {
                 case AWAITING_CLIENT_EDIT_ID: sendClientEditOptions(chatId, Long.parseLong(text)); break;
                 case AWAITING_CLIENT_EDIT_VALUE: processClientEditValue(chatId, text); break;
                 case AWAITING_CLIENT_SEARCH: performClientSearch(chatId, text); break;
-                case AWAITING_CLIENT_TERMINATE_ID: askTerminationReason(chatId, Long.parseLong(text)); break; // NEW
+                case AWAITING_CLIENT_TERMINATE_ID: askTerminationReason(chatId, Long.parseLong(text)); break;
 
                 // Calc & Payment Edit
                 case AWAITING_CALC_AMOUNT: calcAmountMap.put(chatId, Integer.parseInt(text)); userStateMap.put(chatId, UserState.AWAITING_CALC_PRICE); sendMessageWithCancel(chatId, "Введите цену за 1 час:"); break;
@@ -427,7 +444,7 @@ public class RadmirBot extends TelegramLongPollingBot {
         KeyboardRow r1 = new KeyboardRow(); r1.add("📜 Список клиентов"); r1.add("➕ Добавить клиента");
         KeyboardRow r2 = new KeyboardRow(); r2.add("🔍 Поиск клиента"); r2.add("📥 Скачать Excel");
         KeyboardRow r3 = new KeyboardRow(); r3.add("✏️ Ред. клиента"); r3.add("❌ Удалить клиента");
-        KeyboardRow r4 = new KeyboardRow(); r4.add("🛑 Завершить досрочно"); // NEW
+        KeyboardRow r4 = new KeyboardRow(); r4.add("🛑 Завершить досрочно");
         KeyboardRow r5 = new KeyboardRow(); r5.add("🔙 Менеджер");
         keyboard.add(r1); keyboard.add(r2); keyboard.add(r3); keyboard.add(r4); keyboard.add(r5); markup.setKeyboard(keyboard); msg.setReplyMarkup(markup);
         try { execute(msg); } catch (Exception e) {}
@@ -445,79 +462,52 @@ public class RadmirBot extends TelegramLongPollingBot {
         try { execute(msg); } catch (Exception e) {}
     }
 
-    // --- HARVEST LOGIC ---
-
-    // NEW: Reset Harvest Menu
     private void showHarvestResetMenu(Long chatId) {
         List<Ogorod> ogorods = ogorodRepository.findAllByChatId(chatId);
         List<Ogorod> active = ogorods.stream().filter(o -> o.getHarvestState() != null && !o.getHarvestState().equals("IDLE")).collect(Collectors.toList());
         if(active.isEmpty()) { sendMessage(chatId, "🤷‍♂️ Все таймеры по нулям."); return; }
-
         SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Какой таймер сбросить (обнулить)?");
         InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-
-        // Reset ALL button
         List<InlineKeyboardButton> rAll = new ArrayList<>(); rAll.add(createBtn("🔥 Сбросить ВСЕ", "h_reset_all")); rows.add(rAll);
-
-        for (Ogorod o : active) {
-            List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn(o.getTitle(), "h_reset_" + o.getId())); rows.add(r);
-        }
-        mk.setKeyboard(rows); msg.setReplyMarkup(mk);
-        try { execute(msg); } catch(Exception e) {}
+        for (Ogorod o : active) { List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn(o.getTitle(), "h_reset_" + o.getId())); rows.add(r); }
+        mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch(Exception e) {}
     }
 
     private void processHarvestReset(Long chatId, Long ogId) {
-        if (ogId == -1) { // Reset All
+        if (ogId == -1) {
             List<Ogorod> all = ogorodRepository.findAllByChatId(chatId);
-            for(Ogorod o : all) {
-                o.setHarvestState("IDLE"); o.setGrowthStartTime(null); o.setLastWateringTime(null); o.setAccumulatedGrowthMinutes(0);
-                ogorodRepository.save(o);
-            }
+            for(Ogorod o : all) { o.setHarvestState("IDLE"); o.setGrowthStartTime(null); o.setLastWateringTime(null); o.setAccumulatedGrowthMinutes(0); ogorodRepository.save(o); }
             sendMessage(chatId, "✅ Все таймеры сброшены.");
         } else {
             Ogorod o = ogorodRepository.findById(ogId).get();
             o.setHarvestState("IDLE"); o.setGrowthStartTime(null); o.setLastWateringTime(null); o.setAccumulatedGrowthMinutes(0);
-            ogorodRepository.save(o);
-            sendMessage(chatId, "✅ Таймер для <b>" + o.getTitle() + "</b> сброшен.");
+            ogorodRepository.save(o); sendMessage(chatId, "✅ Таймер для <b>" + o.getTitle() + "</b> сброшен.");
         }
     }
 
     private void showHarvestStatus(Long chatId) {
         List<Ogorod> ogorods = ogorodRepository.findAllByChatId(chatId);
         List<Ogorod> growing = ogorods.stream().filter(o -> o.getHarvestState() != null && (o.getHarvestState().equals("GROWING") || o.getHarvestState().equals("WAITING_WATER") || o.getHarvestState().equals("READY"))).collect(Collectors.toList());
-
         if (growing.isEmpty()) { sendMessage(chatId, "🌱 Нет активных посадок."); return; }
-
         StringBuilder sb = new StringBuilder("🌽 <b>Состояние урожая:</b>\n\n");
         LocalDateTime now = LocalDateTime.now(KYIV_ZONE);
-
         for (Ogorod o : growing) {
             sb.append("🏡 <b>").append(o.getTitle()).append("</b>\n");
-
-            if ("READY".equals(o.getHarvestState())) {
-                sb.append("✅ <b>ГОТОВО К СБОРУ!</b>\n");
-            }
-            else if ("WAITING_WATER".equals(o.getHarvestState())) {
-                sb.append("💧 <b>ЖДЕТ ПОЛИВА!</b> (Таймер на паузе)\n");
-            }
+            if ("READY".equals(o.getHarvestState())) { sb.append("✅ <b>ГОТОВО К СБОРУ!</b>\n"); }
+            else if ("WAITING_WATER".equals(o.getHarvestState())) { sb.append("💧 <b>ЖДЕТ ПОЛИВА!</b> (Таймер на паузе)\n"); }
             else if ("GROWING".equals(o.getHarvestState())) {
                 long accumulated = (o.getAccumulatedGrowthMinutes() != null) ? o.getAccumulatedGrowthMinutes() : 0;
                 long currentSession = ChronoUnit.MINUTES.between(o.getLastWateringTime(), now);
                 long totalProgress = accumulated + currentSession;
                 long totalNeeded = o.getGrowthTimeMinutes();
                 long left = totalNeeded - totalProgress;
-
-                if (left <= 0) {
-                    sb.append("✅ <b>ГОТОВО!</b> (Подождите минуту или нажмите Полил для обновления)\n");
-                } else {
-                    long hours = left / 60;
-                    long mins = left % 60;
+                if (left <= 0) { sb.append("✅ <b>ГОТОВО!</b> (Подождите минуту или нажмите Полил для обновления)\n"); }
+                else {
+                    long hours = left / 60; long mins = left % 60;
                     sb.append("⏳ Рост: осталось <b>").append(hours).append("ч ").append(mins).append("мин</b>\n");
-
                     long waterInterval = o.getWateringIntervalMinutes();
                     long nextWaterIn = waterInterval - currentSession;
-                    if (nextWaterIn <= 0) sb.append("⚠️ <b>Пора поливать!</b>\n");
-                    else sb.append("💧 Полив через: ").append(nextWaterIn).append(" мин\n");
+                    if (nextWaterIn <= 0) sb.append("⚠️ <b>Пора поливать!</b>\n"); else sb.append("💧 Полив через: ").append(nextWaterIn).append(" мин\n");
                 }
             }
             sb.append("--------------------\n");
@@ -525,12 +515,7 @@ public class RadmirBot extends TelegramLongPollingBot {
         sendMessage(chatId, sb.toString());
     }
 
-    // --- CLIENTS LOGIC ---
-    private void startAddingClient(Long chatId) {
-        userStateMap.put(chatId, UserState.AWAITING_CLIENT_NICKNAME);
-        clientDraftMap.put(chatId, new ClientRecord());
-        sendMessageWithCancel(chatId, "Введите Никнейм клиента:");
-    }
+    private void startAddingClient(Long chatId) { userStateMap.put(chatId, UserState.AWAITING_CLIENT_NICKNAME); clientDraftMap.put(chatId, new ClientRecord()); sendMessageWithCancel(chatId, "Введите Никнейм клиента:"); }
 
     private void showClientsList(Long chatId) {
         List<ClientRecord> allClients = clientRepository.findAllByChatId(chatId);
@@ -541,106 +526,55 @@ public class RadmirBot extends TelegramLongPollingBot {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
         for (ClientRecord c : lastSeven) {
             double pricePerHour = "дн".equals(c.getDurationUnit()) ? c.getPrice() / (c.getDuration() * 24.0) : c.getPrice() / c.getDuration();
-
             String status = "🟢 Активен";
             if (c.getTerminationReason() != null) {
                 if (c.getTerminationReason().equals("CLIENT_EARLY")) status = "🔴 Досрочно (Клиент)";
                 else if (c.getTerminationReason().equals("OWNER_EARLY")) status = "🔴 Досрочно (Вы)";
                 else if (c.getTerminationReason().equals("OGOROD_DELETED")) status = "🔴 Огород удален";
-            } else if (LocalDateTime.now(KYIV_ZONE).isAfter(c.getEndDate())) {
-                status = "🔴 Истек";
-            }
-
+            } else if (LocalDateTime.now(KYIV_ZONE).isAfter(c.getEndDate())) { status = "🔴 Истек"; }
             sb.append("🆔 ID: <b>").append(c.getId()).append("</b>\n").append("👤 <b>").append(c.getNickname()).append("</b> (").append(c.getOgorodName()).append(")\n").append("📞 ").append(c.getContact()).append("\n").append("💰 ").append(formatPrice(c.getPrice())).append(" (").append(formatPrice(pricePerHour)).append("/ч)\n").append("📅 С: ").append(c.getStartDate().format(fmt)).append("\n").append("🏁 До: ").append(c.getEndDate().format(fmt)).append(" (").append(status).append(")\n--------------------------\n");
         }
         sendMessage(chatId, sb.toString());
     }
 
-    // --- CLIENT TERMINATION LOGIC ---
-    private void startTerminatingClient(Long chatId) {
-        sendMessageWithCancel(chatId, "Введите ID клиента для завершения:");
-        userStateMap.put(chatId, UserState.AWAITING_CLIENT_TERMINATE_ID);
-    }
+    private void startTerminatingClient(Long chatId) { sendMessageWithCancel(chatId, "Введите ID клиента для завершения:"); userStateMap.put(chatId, UserState.AWAITING_CLIENT_TERMINATE_ID); }
 
     private void askTerminationReason(Long chatId, Long clientId) {
         Optional<ClientRecord> cOpt = clientRepository.findById(clientId);
         if (cOpt.isEmpty() || !cOpt.get().getChatId().equals(chatId)) { sendMessageWithCancel(chatId, "❌ Клиент не найден."); return; }
-
-        // Check if already expired
-        if(LocalDateTime.now(KYIV_ZONE).isAfter(cOpt.get().getEndDate())) {
-            sendMessage(chatId, "⚠️ Этот клиент уже истек.");
-            showClientSubMenu(chatId);
-            resetUserState(chatId);
-            return;
-        }
-
+        if(LocalDateTime.now(KYIV_ZONE).isAfter(cOpt.get().getEndDate())) { sendMessage(chatId, "⚠️ Этот клиент уже истек."); showClientSubMenu(chatId); resetUserState(chatId); return; }
         terminateClientIdMap.put(chatId, clientId);
         SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Кто завершил аренду?");
         InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>();
-        r.add(createBtn("👤 Клиент", "term_client"));
-        r.add(createBtn("🙋‍♂️ Я (Владелец)", "term_owner"));
-        rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk);
-        try { execute(msg); } catch(Exception e) {}
+        r.add(createBtn("👤 Клиент", "term_client")); r.add(createBtn("🙋‍♂️ Я (Владелец)", "term_owner"));
+        rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch(Exception e) {}
     }
 
     private void processTermination(Long chatId, String reason) {
         ClientRecord c = clientRepository.findById(terminateClientIdMap.get(chatId)).get();
         LocalDateTime now = LocalDateTime.now(KYIV_ZONE);
-
-        // 1. Update End Date
-        c.setEndDate(now);
-        c.setTerminationReason(reason);
-
-        // 2. Calculate Refund if Owner cancelled
+        c.setEndDate(now); c.setTerminationReason(reason);
         if ("OWNER_EARLY".equals(reason)) {
-            // Logic: Calculate used time ratio and update price
             long totalMinutesPlanned;
-            if("дн".equals(c.getDurationUnit())) totalMinutesPlanned = (long)c.getDuration() * 24 * 60;
-            else totalMinutesPlanned = (long)c.getDuration() * 60;
-
+            if("дн".equals(c.getDurationUnit())) totalMinutesPlanned = (long)c.getDuration() * 24 * 60; else totalMinutesPlanned = (long)c.getDuration() * 60;
             long minutesUsed = Duration.between(c.getStartDate(), now).toMinutes();
             if (minutesUsed < 0) minutesUsed = 0;
-
             if (totalMinutesPlanned > 0) {
                 double ratio = (double) minutesUsed / totalMinutesPlanned;
                 if (ratio > 1.0) ratio = 1.0;
                 double newPrice = c.getPrice() * ratio;
-
-                // Show info
                 double refund = c.getPrice() - newPrice;
                 sendMessage(chatId, "💸 <b>Возврат клиенту:</b> " + formatPrice(refund) + "\n(Вычтено из статистики)");
-
                 c.setPrice(newPrice);
             }
-        } else {
-            sendMessage(chatId, "✅ Завершено. Полная сумма ("+formatPrice(c.getPrice())+") сохранена в статистике.");
-        }
-
-        clientRepository.save(c);
-        resetUserState(chatId);
-        showClientSubMenu(chatId);
+        } else { sendMessage(chatId, "✅ Завершено. Полная сумма ("+formatPrice(c.getPrice())+") сохранена в статистике."); }
+        clientRepository.save(c); resetUserState(chatId); showClientSubMenu(chatId);
     }
 
-    private void startSearchingClient(Long chatId) {
-        userStateMap.put(chatId, UserState.AWAITING_CLIENT_SEARCH);
-        sendMessageWithCancel(chatId, "Введите часть никнейма для поиска:");
-    }
-
-    private void generateClientsExcel(Long chatId, String query) {
-        List<ClientRecord> clients = clientRepository.findAllByChatId(chatId);
-        if(clients.isEmpty()) { sendMessage(chatId, "Нет данных."); return; }
-        sendExcelReport(chatId, clients, "clients.xlsx");
-    }
-
-    private void startEditingClientInput(Long chatId) {
-        sendMessageWithCancel(chatId, "Введите ID клиента для редактирования:");
-        userStateMap.put(chatId, UserState.AWAITING_CLIENT_EDIT_ID);
-    }
-
-    private void startDeletingClient(Long chatId) {
-        sendMessageWithCancel(chatId, "Введите ID клиента для удаления:");
-        userStateMap.put(chatId, UserState.AWAITING_CLIENT_DELETE_ID);
-    }
+    private void startSearchingClient(Long chatId) { userStateMap.put(chatId, UserState.AWAITING_CLIENT_SEARCH); sendMessageWithCancel(chatId, "Введите часть никнейма для поиска:"); }
+    private void generateClientsExcel(Long chatId, String query) { List<ClientRecord> clients = clientRepository.findAllByChatId(chatId); if(clients.isEmpty()) { sendMessage(chatId, "Нет данных."); return; } sendExcelReport(chatId, clients, "clients.xlsx"); }
+    private void startEditingClientInput(Long chatId) { sendMessageWithCancel(chatId, "Введите ID клиента для редактирования:"); userStateMap.put(chatId, UserState.AWAITING_CLIENT_EDIT_ID); }
+    private void startDeletingClient(Long chatId) { sendMessageWithCancel(chatId, "Введите ID клиента для удаления:"); userStateMap.put(chatId, UserState.AWAITING_CLIENT_DELETE_ID); }
 
     private void performClientSearch(Long chatId, String query) {
         List<ClientRecord> all = clientRepository.findAllByChatId(chatId);
@@ -671,9 +605,7 @@ public class RadmirBot extends TelegramLongPollingBot {
             SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("⚠️ <b>ВНИМАНИЕ!</b>\nОгород '" + o.getTitle() + "' занят. Подвязать?"); msg.setParseMode("HTML");
             InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("✅ Да", "client_confirm_override_yes")); r.add(createBtn("⛔️ Нет", "client_confirm_override_no")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk);
             clientDraftMap.get(chatId).setOgorodName(o.getTitle()); try { execute(msg); } catch (Exception e) {}
-        } else {
-            clientDraftMap.get(chatId).setOgorodName(o.getTitle()); sendClientUnitChoice(chatId);
-        }
+        } else { clientDraftMap.get(chatId).setOgorodName(o.getTitle()); sendClientUnitChoice(chatId); }
     }
 
     private void sendClientUnitChoice(Long chatId) {
@@ -681,66 +613,26 @@ public class RadmirBot extends TelegramLongPollingBot {
         InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("Часы", "client_unit_hours")); r.add(createBtn("Дни", "client_unit_days")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch (Exception e) {}
     }
 
-    private void processClientUnit(Long chatId, String unit) {
-        clientDraftMap.get(chatId).setDurationUnit(unit); userStateMap.put(chatId, UserState.AWAITING_CLIENT_DURATION); sendMessageWithCancel(chatId, "Введите длительность (число):");
-    }
-
-    private void processClientContact(Long chatId, String contact) {
-        clientDraftMap.get(chatId).setContact(contact); sendClientStartModeChoice(chatId);
-    }
-
+    private void processClientUnit(Long chatId, String unit) { clientDraftMap.get(chatId).setDurationUnit(unit); userStateMap.put(chatId, UserState.AWAITING_CLIENT_DURATION); sendMessageWithCancel(chatId, "Введите длительность (число):"); }
+    private void processClientContact(Long chatId, String contact) { clientDraftMap.get(chatId).setContact(contact); sendClientStartModeChoice(chatId); }
     private void sendClientStartModeChoice(Long chatId) {
         SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Когда началась аренда?");
         InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("🟢 Сейчас", "client_start_now")); r.add(createBtn("📅 Указать дату", "client_start_custom")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); userStateMap.put(chatId, UserState.AWAITING_CLIENT_START_MODE); try { execute(msg); } catch (Exception e) {}
     }
-
     private void finishAddingClient(Long chatId, LocalDateTime startDate) {
         ClientRecord c = clientDraftMap.get(chatId); c.setStartDate(startDate);
         LocalDateTime end = "дн".equals(c.getDurationUnit()) ? startDate.plusDays(c.getDuration()) : startDate.plusHours(c.getDuration());
         c.setEndDate(end); c.setNotificationSent(false);
         clientRepository.save(c); resetUserState(chatId); sendMessage(chatId, "✅ Клиент добавлен! Начало: " + startDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))); showClientSubMenu(chatId);
     }
-
-    private void askClientCustomDate(Long chatId) {
-        userStateMap.put(chatId, UserState.AWAITING_CLIENT_START_DATE); sendMessageWithCancel(chatId, "Введите дату и время начала (ГГГГ-ММ-ДД ЧЧ:ММ):");
-    }
-
-    private void processClientCustomDate(Long chatId, String text) {
-        try { LocalDateTime customStart = LocalDateTime.parse(text, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")); finishAddingClient(chatId, customStart); } catch (Exception e) { sendMessageWithCancel(chatId, "❌ Неверный формат."); }
-    }
-
-    private void handleClientEditField(Long chatId, String data) {
-        editFieldMap.put(chatId, data.replace("cedit_", "")); userStateMap.put(chatId, UserState.AWAITING_CLIENT_EDIT_VALUE);
-        if (data.equals("cedit_start")) sendMessageWithCancel(chatId, "Введите новую дату (ГГГГ-ММ-ДД ЧЧ:ММ):"); else sendMessageWithCancel(chatId, "Введите новое значение:");
-    }
-
-    private void handleOgorodEditField(Long chatId, String data) {
-        editFieldMap.put(chatId, data.replace("oedit_", "")); userStateMap.put(chatId, UserState.AWAITING_OGOROD_EDIT_VALUE);
-        if(data.endsWith("date")) sendMessageWithCancel(chatId, "Введите дату покупки (ГГГГ-ММ-ДД):"); else sendMessageWithCancel(chatId, "Введите новое значение:");
-    }
-
-    private void startOgorodExtension(Long chatId, String data, Integer msgId, String text) {
-        extensionOgorodIdMap.put(chatId, Long.parseLong(data.split("_")[2]));
-        userStateMap.put(chatId, UserState.AWAITING_OGOROD_EXTEND_DAYS);
-        // Змінено текст запитання:
-        sendMessageWithCancel(chatId, "Введите новое значение (на сколько щас оплачено?):");
-    }
-
-    private void sendOgorodEditOptions(Long chatId, long id) {
-        editOgorodIdMap.put(chatId, id); SendMessage m = new SendMessage(); m.setChatId(chatId); m.setText("Что изменить?");
-        InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r1 = new ArrayList<>(); r1.add(createBtn("Название", "oedit_title")); r1.add(createBtn("Цена", "oedit_price")); List<InlineKeyboardButton> r2 = new ArrayList<>(); r2.add(createBtn("Дни оплаты", "oedit_days")); r2.add(createBtn("📅 Дата покупки", "oedit_date")); rows.add(r1); rows.add(r2); mk.setKeyboard(rows); m.setReplyMarkup(mk); try { execute(m); } catch (Exception e) {}
-    }
-
-    private void processOgorodEditValue(Long chatId, String text) {
-        Ogorod o = ogorodRepository.findById(editOgorodIdMap.get(chatId)).get(); String f = editFieldMap.get(chatId);
-        try { if(f.equals("title")) o.setTitle(text); if(f.equals("price")) o.setPrice(parsePrice(text)); if(f.equals("date")) o.setPurchaseDate(LocalDate.parse(text)); if(f.equals("days")) { int d = Integer.parseInt(text); o.setDaysPaid(d); o.setPaidUntil(LocalDate.now(KYIV_ZONE).plusDays(d)); } ogorodRepository.save(o); resetUserState(chatId); sendMessage(chatId, "✅ Огород обновлен."); showOgorodSubMenu(chatId); } catch(Exception e) { sendMessageWithCancel(chatId, "❌ Ошибка."); }
-    }
-
-    private void sendClientEditOptions(Long chatId, long id) {
-        editClientIdMap.put(chatId, id); SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Что изменить?");
-        InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r1 = new ArrayList<>(); r1.add(createBtn("Никнейм", "cedit_nick")); r1.add(createBtn("Цена", "cedit_price")); List<InlineKeyboardButton> r2 = new ArrayList<>(); r2.add(createBtn("Контакт", "cedit_contact")); r2.add(createBtn("Длительность", "cedit_dur")); List<InlineKeyboardButton> r3 = new ArrayList<>(); r3.add(createBtn("📅 Дата начала", "cedit_start")); rows.add(r1); rows.add(r2); rows.add(r3); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch (Exception e) {}
-    }
-
+    private void askClientCustomDate(Long chatId) { userStateMap.put(chatId, UserState.AWAITING_CLIENT_START_DATE); sendMessageWithCancel(chatId, "Введите дату и время начала (ГГГГ-ММ-ДД ЧЧ:ММ):"); }
+    private void processClientCustomDate(Long chatId, String text) { try { LocalDateTime customStart = LocalDateTime.parse(text, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")); finishAddingClient(chatId, customStart); } catch (Exception e) { sendMessageWithCancel(chatId, "❌ Неверный формат."); } }
+    private void handleClientEditField(Long chatId, String data) { editFieldMap.put(chatId, data.replace("cedit_", "")); userStateMap.put(chatId, UserState.AWAITING_CLIENT_EDIT_VALUE); if (data.equals("cedit_start")) sendMessageWithCancel(chatId, "Введите новую дату (ГГГГ-ММ-ДД ЧЧ:ММ):"); else sendMessageWithCancel(chatId, "Введите новое значение:"); }
+    private void handleOgorodEditField(Long chatId, String data) { editFieldMap.put(chatId, data.replace("oedit_", "")); userStateMap.put(chatId, UserState.AWAITING_OGOROD_EDIT_VALUE); if(data.endsWith("date")) sendMessageWithCancel(chatId, "Введите дату покупки (ГГГГ-ММ-ДД):"); else sendMessageWithCancel(chatId, "Введите новое значение:"); }
+    private void startOgorodExtension(Long chatId, String data, Integer msgId, String text) { extensionOgorodIdMap.put(chatId, Long.parseLong(data.split("_")[2])); userStateMap.put(chatId, UserState.AWAITING_OGOROD_EXTEND_DAYS); sendMessageWithCancel(chatId, "Введите новое значение (на сколько щас оплачено?):"); }
+    private void sendOgorodEditOptions(Long chatId, long id) { editOgorodIdMap.put(chatId, id); SendMessage m = new SendMessage(); m.setChatId(chatId); m.setText("Что изменить?"); InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r1 = new ArrayList<>(); r1.add(createBtn("Название", "oedit_title")); r1.add(createBtn("Цена", "oedit_price")); List<InlineKeyboardButton> r2 = new ArrayList<>(); r2.add(createBtn("Дни оплаты", "oedit_days")); r2.add(createBtn("📅 Дата покупки", "oedit_date")); rows.add(r1); rows.add(r2); mk.setKeyboard(rows); m.setReplyMarkup(mk); try { execute(m); } catch (Exception e) {} }
+    private void processOgorodEditValue(Long chatId, String text) { Ogorod o = ogorodRepository.findById(editOgorodIdMap.get(chatId)).get(); String f = editFieldMap.get(chatId); try { if(f.equals("title")) o.setTitle(text); if(f.equals("price")) o.setPrice(parsePrice(text)); if(f.equals("date")) o.setPurchaseDate(LocalDate.parse(text)); if(f.equals("days")) { int d = Integer.parseInt(text); o.setDaysPaid(d); o.setPaidUntil(LocalDate.now(KYIV_ZONE).plusDays(d)); } ogorodRepository.save(o); resetUserState(chatId); sendMessage(chatId, "✅ Огород обновлен."); showOgorodSubMenu(chatId); } catch(Exception e) { sendMessageWithCancel(chatId, "❌ Ошибка."); } }
+    private void sendClientEditOptions(Long chatId, long id) { editClientIdMap.put(chatId, id); SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Что изменить?"); InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r1 = new ArrayList<>(); r1.add(createBtn("Никнейм", "cedit_nick")); r1.add(createBtn("Цена", "cedit_price")); List<InlineKeyboardButton> r2 = new ArrayList<>(); r2.add(createBtn("Контакт", "cedit_contact")); r2.add(createBtn("Длительность", "cedit_dur")); List<InlineKeyboardButton> r3 = new ArrayList<>(); r3.add(createBtn("📅 Дата начала", "cedit_start")); rows.add(r1); rows.add(r2); rows.add(r3); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch (Exception e) {} }
     private void processClientEditValue(Long chatId, String text) {
         ClientRecord c = clientRepository.findById(editClientIdMap.get(chatId)).get(); String f = editFieldMap.get(chatId);
         try { if(f.equals("nick")) c.setNickname(text); if(f.equals("price")) c.setPrice(parsePrice(text)); if(f.equals("contact")) c.setContact(text); if(f.equals("dur")) c.setDuration(Integer.parseInt(text)); if(f.equals("start")) c.setStartDate(LocalDateTime.parse(text, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
@@ -749,30 +641,12 @@ public class RadmirBot extends TelegramLongPollingBot {
         } catch(Exception e) { sendMessageWithCancel(chatId, "❌ Ошибка формата."); }
     }
 
-    // --- BUTTONS & PROMPTS HELPERS ---
-    private void askForPaymentDate(Long chatId) {
-        SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Введите дату покупки (ГГГГ-ММ-ДД):");
-        InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("📅 Сегодня", "btn_date_today_payment")); r.add(createBtn("⏭ Пропустить", "btn_skip_date_payment")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk);
-        ReplyKeyboardMarkup kb = new ReplyKeyboardMarkup(); kb.setResizeKeyboard(true); KeyboardRow row = new KeyboardRow(); row.add("🔙 Отмена"); kb.setKeyboard(Collections.singletonList(row)); try { execute(msg); } catch(Exception e) {}
-    }
-    private void askForPaymentPrice(Long chatId) {
-        SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Введите цену покупки:");
-        InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("⏭ Пропустить", "btn_skip_price_payment")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch(Exception e) {}
-    }
-    private void askForOgorodDate(Long chatId) {
-        SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Введите дату покупки (ГГГГ-ММ-ДД):");
-        InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("📅 Сегодня", "btn_date_today_ogorod")); r.add(createBtn("⏭ Пропустить", "btn_skip_date_ogorod")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch(Exception e) {}
-    }
-    private void askForOgorodPrice(Long chatId) {
-        SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Введите цену покупки:");
-        InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("⏭ Пропустить", "btn_skip_price_ogorod")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch(Exception e) {}
-    }
-    private void askForClientContact(Long chatId) {
-        SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Введите контакт клиента:");
-        InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("⏭ Пропустить", "btn_skip_contact")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch(Exception e) {}
-    }
+    private void askForPaymentDate(Long chatId) { SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Введите дату покупки (ГГГГ-ММ-ДД):"); InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("📅 Сегодня", "btn_date_today_payment")); r.add(createBtn("⏭ Пропустить", "btn_skip_date_payment")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); ReplyKeyboardMarkup kb = new ReplyKeyboardMarkup(); kb.setResizeKeyboard(true); KeyboardRow row = new KeyboardRow(); row.add("🔙 Отмена"); kb.setKeyboard(Collections.singletonList(row)); try { execute(msg); } catch(Exception e) {} }
+    private void askForPaymentPrice(Long chatId) { SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Введите цену покупки:"); InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("⏭ Пропустить", "btn_skip_price_payment")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch(Exception e) {} }
+    private void askForOgorodDate(Long chatId) { SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Введите дату покупки (ГГГГ-ММ-ДД):"); InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("📅 Сегодня", "btn_date_today_ogorod")); r.add(createBtn("⏭ Пропустить", "btn_skip_date_ogorod")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch(Exception e) {} }
+    private void askForOgorodPrice(Long chatId) { SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Введите цену покупки:"); InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("⏭ Пропустить", "btn_skip_price_ogorod")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch(Exception e) {} }
+    private void askForClientContact(Long chatId) { SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Введите контакт клиента:"); InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("⏭ Пропустить", "btn_skip_contact")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch(Exception e) {} }
 
-    // --- OTHER METHODS ---
     private int parseTime(String text) { try { String[] parts = text.split(":"); return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]); } catch (Exception e) { return -1; } }
 
     private void setupHarvestParams(Long chatId) {
@@ -843,73 +717,40 @@ public class RadmirBot extends TelegramLongPollingBot {
         InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         List<InlineKeyboardButton> r1 = new ArrayList<>(); r1.add(createBtn("♾ За все время", "stats_p_all")); r1.add(createBtn("🗓 За год", "stats_p_year"));
         List<InlineKeyboardButton> r2 = new ArrayList<>(); r2.add(createBtn("📅 За месяц", "stats_p_month")); r2.add(createBtn("📅 За неделю", "stats_p_week"));
-
-        List<InlineKeyboardButton> r3 = new ArrayList<>();
-        String resetCallback = statsTypeMap.get(chatId).equals("harvest") ? "stats_reset_harvest" : "stats_reset_clients";
-        r3.add(createBtn("🗑 Сбросить статистику", resetCallback));
-
-        rows.add(r1); rows.add(r2); rows.add(r3); mk.setKeyboard(rows); msg.setReplyMarkup(mk);
-        try { execute(msg); } catch (Exception e) {}
+        List<InlineKeyboardButton> r3 = new ArrayList<>(); String resetCallback = statsTypeMap.get(chatId).equals("harvest") ? "stats_reset_harvest" : "stats_reset_clients"; r3.add(createBtn("🗑 Сбросить статистику", resetCallback));
+        rows.add(r1); rows.add(r2); rows.add(r3); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch (Exception e) {}
     }
 
-    // --- RESET LOGIC ---
-    private void askResetHarvestStats(Long chatId) {
-        SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("⚠️ <b>Вы уверены?</b>\nВся история сбора урожая будет удалена безвозвратно."); msg.setParseMode("HTML");
-        InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("✅ Да", "confirm_reset_h_yes")); r.add(createBtn("🚫 Нет", "confirm_reset_h_no")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch (Exception e) {}
-    }
-    private void processResetHarvestStats(Long chatId) {
-        harvestRecordRepository.deleteAllByChatId(chatId); sendMessage(chatId, "✅ История урожая очищена."); showHarvestMenu(chatId);
-    }
-    private void askResetClientStats(Long chatId) {
-        SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("⚠️ <b>Вы уверены?</b>\nЭто удалит ВСЕХ клиентов (и активных, и историю)."); msg.setParseMode("HTML");
-        InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("✅ Да", "confirm_reset_c_yes")); r.add(createBtn("🚫 Нет", "confirm_reset_c_no")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch (Exception e) {}
-    }
-    private void processResetClientStats(Long chatId) {
-        clientRepository.deleteAllByChatId(chatId); sendMessage(chatId, "✅ База клиентов очищена."); showClientSubMenu(chatId);
-    }
+    private void askResetHarvestStats(Long chatId) { SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("⚠️ <b>Вы уверены?</b>\nВся история сбора урожая будет удалена безвозвратно."); msg.setParseMode("HTML"); InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("✅ Да", "confirm_reset_h_yes")); r.add(createBtn("🚫 Нет", "confirm_reset_h_no")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch (Exception e) {} }
+    private void processResetHarvestStats(Long chatId) { harvestRecordRepository.deleteAllByChatId(chatId); sendMessage(chatId, "✅ История урожая очищена."); showHarvestMenu(chatId); }
+    private void askResetClientStats(Long chatId) { SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("⚠️ <b>Вы уверены?</b>\nЭто удалит ВСЕХ клиентов (и активных, и историю)."); msg.setParseMode("HTML"); InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn("✅ Да", "confirm_reset_c_yes")); r.add(createBtn("🚫 Нет", "confirm_reset_c_no")); rows.add(r); mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch (Exception e) {} }
+    private void processResetClientStats(Long chatId) { clientRepository.deleteAllByChatId(chatId); sendMessage(chatId, "✅ База клиентов очищена."); showClientSubMenu(chatId); }
 
     private void processStatsPeriod(Long chatId, String period) {
-        statsPeriodMap.put(chatId, period);
-        List<Ogorod> list = ogorodRepository.findAllByChatId(chatId);
+        statsPeriodMap.put(chatId, period); List<Ogorod> list = ogorodRepository.findAllByChatId(chatId);
         SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Выберите огород:");
         InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         List<InlineKeyboardButton> rAll = new ArrayList<>(); rAll.add(createBtn("Все огороды", "stats_o_all")); rows.add(rAll);
         for(Ogorod o : list) { List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn(o.getTitle(), "stats_o_" + o.getId())); rows.add(r); }
-        mk.setKeyboard(rows); msg.setReplyMarkup(mk);
-        try { execute(msg); } catch (Exception e) {}
+        mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch (Exception e) {}
     }
 
     private void processStatsOgorod(Long chatId, String ogorodIdStr) {
-        String period = statsPeriodMap.get(chatId);
-        String type = statsTypeMap.getOrDefault(chatId, "clients");
-
-        LocalDateTime now = LocalDateTime.now(KYIV_ZONE);
-        LocalDateTime calculatedCutoff;
-        if (period.equals("month")) calculatedCutoff = now.minusMonths(1);
-        else if (period.equals("week")) calculatedCutoff = now.minusWeeks(1);
-        else if (period.equals("year")) calculatedCutoff = now.minusYears(1);
-        else calculatedCutoff = LocalDateTime.MIN;
-        final LocalDateTime finalCutoff = calculatedCutoff; // Effectively final
-
+        String period = statsPeriodMap.get(chatId); String type = statsTypeMap.getOrDefault(chatId, "clients");
+        LocalDateTime now = LocalDateTime.now(KYIV_ZONE); LocalDateTime calculatedCutoff;
+        if (period.equals("month")) calculatedCutoff = now.minusMonths(1); else if (period.equals("week")) calculatedCutoff = now.minusWeeks(1); else if (period.equals("year")) calculatedCutoff = now.minusYears(1); else calculatedCutoff = LocalDateTime.MIN;
+        final LocalDateTime finalCutoff = calculatedCutoff;
         double total = 0;
         if (type.equals("clients")) {
             List<ClientRecord> all = clientRepository.findAllByChatId(chatId);
-            if(!ogorodIdStr.equals("all")) {
-                String name = ogorodRepository.findById(Long.parseLong(ogorodIdStr)).get().getTitle();
-                all = all.stream().filter(c -> c.getOgorodName().equals(name)).collect(Collectors.toList());
-            }
+            if(!ogorodIdStr.equals("all")) { String name = ogorodRepository.findById(Long.parseLong(ogorodIdStr)).get().getTitle(); all = all.stream().filter(c -> c.getOgorodName().equals(name)).collect(Collectors.toList()); }
             total = all.stream().filter(c -> c.getStartDate().isAfter(finalCutoff)).mapToDouble(ClientRecord::getPrice).sum();
         } else {
             List<HarvestRecord> all = harvestRecordRepository.findAllByChatId(chatId);
-            if(!ogorodIdStr.equals("all")) {
-                Long oid = Long.parseLong(ogorodIdStr);
-                all = all.stream().filter(r -> r.getOgorodId().equals(oid)).collect(Collectors.toList());
-            }
+            if(!ogorodIdStr.equals("all")) { Long oid = Long.parseLong(ogorodIdStr); all = all.stream().filter(r -> r.getOgorodId().equals(oid)).collect(Collectors.toList()); }
             total = all.stream().filter(r -> r.getHarvestedAt().isAfter(finalCutoff)).mapToDouble(HarvestRecord::getAmount).sum();
         }
-
-        sendMessage(chatId, "💰 Доход (" + type + " / " + period + "): <b>" + formatPrice(total) + "</b>");
-        statsTypeMap.remove(chatId);
+        sendMessage(chatId, "💰 Доход (" + type + " / " + period + "): <b>" + formatPrice(total) + "</b>"); statsTypeMap.remove(chatId);
     }
 
     public void showPayments(Long chatId) {
@@ -926,8 +767,7 @@ public class RadmirBot extends TelegramLongPollingBot {
     }
 
     private void showOgorodList(Long chatId) {
-        List<Ogorod> ogorods = ogorodRepository.findAllByChatId(chatId);
-        ogorods.sort(Comparator.comparing(Ogorod::getId));
+        List<Ogorod> ogorods = ogorodRepository.findAllByChatId(chatId); ogorods.sort(Comparator.comparing(Ogorod::getId));
         Set<String> occupied = clientRepository.findAllByChatId(chatId).stream().filter(c -> c.getEndDate().isAfter(LocalDateTime.now(KYIV_ZONE))).map(ClientRecord::getOgorodName).collect(Collectors.toSet());
         StringBuilder sb = new StringBuilder("🏡 <b>Список ваших огородов:</b>\n\n");
         if (ogorods.isEmpty()) { sb.append("Список пуст."); } else {
@@ -940,14 +780,24 @@ public class RadmirBot extends TelegramLongPollingBot {
         sendMessage(chatId, sb.toString());
     }
 
-    private void startAddingOgorod(Long chatId) { userStateMap.put(chatId, UserState.AWAITING_OGOROD_NAME); ogorodDraftMap.put(chatId, new Ogorod()); sendMessageWithCancel(chatId, "Введите название огорода:"); }
+    // ТУТ ВСТАНОВЛЮЮТЬСЯ ПАРАМЕТРИ ЗА ЗАМОВЧУВАННЯМ
+    private void startAddingOgorod(Long chatId) {
+        userStateMap.put(chatId, UserState.AWAITING_OGOROD_NAME);
+        Ogorod o = new Ogorod();
+        // Встановлюємо дефолтні значення:
+        o.setGrowthTimeMinutes(170);   // 02:50 (2 * 60 + 50 = 170)
+        o.setWateringIntervalMinutes(35); // 35 min
+        o.setHarvestProfit(193950.0);  // 193.950
+        ogorodDraftMap.put(chatId, o);
+        sendMessageWithCancel(chatId, "Введите название огорода:");
+    }
     private void startDeletingOgorod(Long chatId) { sendMessageWithCancel(chatId, "Введите ID огорода для удаления (см. в Списке):"); userStateMap.put(chatId, UserState.AWAITING_OGOROD_DELETE_ID); }
     private void startEditingOgorod(Long chatId) { sendMessageWithCancel(chatId, "Введите ID огорода для редактирования:"); userStateMap.put(chatId, UserState.AWAITING_OGOROD_EDIT_ID); }
 
     private void startAddingPayment(Long chatId) { paymentDraftMap.put(chatId, new Payment()); userStateMap.put(chatId, UserState.AWAITING_NAME); sendMessageWithCancel(chatId, "Введите название (например: Дом):"); }
     private void startDeletingPayment(Long chatId) { sendMessageWithCancel(chatId, "Введите ID записи для удаления:"); userStateMap.put(chatId, UserState.AWAITING_DELETE_ID); }
     private void startEditingPayment(Long chatId) { sendMessageWithCancel(chatId, "Введите ID записи для редактирования:"); userStateMap.put(chatId, UserState.AWAITING_EDIT_ID); }
-    private void startExtension(Long chatId, String data, Integer msgId, String text) {extensionPaymentIdMap.put(chatId, Long.parseLong(data.split("_")[1])); userStateMap.put(chatId, UserState.AWAITING_EXTENSION_DAYS); sendMessageWithCancel(chatId, "Введите новое значение (на сколько щас оплачено?):");}
+    private void startExtension(Long chatId, String data, Integer msgId, String text) { extensionPaymentIdMap.put(chatId, Long.parseLong(data.split("_")[1])); userStateMap.put(chatId, UserState.AWAITING_EXTENSION_DAYS); sendMessageWithCancel(chatId, "Введите новое значение (на сколько щас оплачено?):"); }
     private void handleEditFieldChoice(Long chatId, String data, Integer msgId) { String f = data.split("_")[1]; editFieldMap.put(chatId, f); editPaymentIdMap.put(chatId, Long.parseLong(data.split("_")[2])); userStateMap.put(chatId, UserState.AWAITING_EDIT_VALUE); if(f.equals("date")) sendMessageWithCancel(chatId, "Введите дату покупки (ГГГГ-ММ-ДД):"); else sendMessageWithCancel(chatId, "Введите новое значение:"); }
     private void processEditValue(Long chatId, String text) { Payment p = paymentRepository.findById(editPaymentIdMap.get(chatId)).get(); String f = editFieldMap.get(chatId); if(f.equals("name")) p.setName(text); if(f.equals("price")) p.setPrice(parsePrice(text)); if(f.equals("days")) { int d = Integer.parseInt(text); p.setDaysPaid(d); p.setPaidUntil(LocalDate.now(KYIV_ZONE).plusDays(d)); } if(f.equals("date")) p.setPurchaseDate(LocalDate.parse(text)); paymentRepository.save(p); resetUserState(chatId); sendMessage(chatId, "✅ Запись обновлена."); showMainMenu(chatId, "Меню:"); }
     private void sendEditOptions(Long chatId, Long id) { editPaymentIdMap.put(chatId, id); SendMessage m = new SendMessage(); m.setChatId(chatId); m.setText("Что менять?"); InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> r = new ArrayList<>(); List<InlineKeyboardButton> r1 = new ArrayList<>(); r1.add(createBtn("Название", "edit_name_"+id)); r1.add(createBtn("Дата покупки", "edit_date_"+id)); List<InlineKeyboardButton> r2 = new ArrayList<>(); r2.add(createBtn("Цена", "edit_price_"+id)); r2.add(createBtn("Дни оплаты", "edit_days_"+id)); r.add(r1); r.add(r2); mk.setKeyboard(r); m.setReplyMarkup(mk); try { execute(m); } catch (Exception e) {} }
