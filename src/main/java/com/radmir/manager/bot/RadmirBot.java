@@ -170,26 +170,37 @@ public class RadmirBot extends TelegramLongPollingBot {
         Long chatId = q.getMessage().getChatId();
         Integer msgId = q.getMessage().getMessageId();
 
-        // Harvest
-        if (data.startsWith("h_param_")) {
+        // 1. Обробка натискання на кнопки значень (02:50, 35, 193.950)
+        if (data.startsWith("val_")) {
+            String value = data.replace("val_", "");
+            // Передаємо значення так, ніби користувач ввів його вручну
+            processInput(chatId, value, userStateMap.get(chatId));
+        }
+
+        // 2. Harvest Params (Start)
+        else if (data.startsWith("h_param_")) {
             Long oid = Long.parseLong(data.split("_")[2]);
             harvestParamOgorodId.put(chatId, oid);
             userStateMap.put(chatId, UserState.AWAITING_HARVEST_GROWTH_TIME);
 
-            // КНОПКА "02:50" (ТУТ ВОНА Є)
+            // КНОПКА "02:50" (Inline)
             SendMessage m = new SendMessage();
             m.setChatId(chatId);
-            m.setText("Введите время роста (ЧЧ:ММ), например 3:30\nИли нажмите кнопку:");
-            ReplyKeyboardMarkup mk = new ReplyKeyboardMarkup();
-            mk.setResizeKeyboard(true);
-            List<KeyboardRow> kb = new ArrayList<>();
-            KeyboardRow r1 = new KeyboardRow(); r1.add("02:50");
-            KeyboardRow r2 = new KeyboardRow(); r2.add("🔙 Отмена");
-            kb.add(r1); kb.add(r2);
-            mk.setKeyboard(kb);
+            m.setText("Введите время роста (ЧЧ:ММ), например 3:30\nИли выберите:");
+
+            InlineKeyboardMarkup mk = new InlineKeyboardMarkup();
+            List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+            List<InlineKeyboardButton> row = new ArrayList<>();
+            row.add(createBtn("02:50", "val_02:50"));
+            rows.add(row);
+            mk.setKeyboard(rows);
             m.setReplyMarkup(mk);
+
+            // Залишаємо кнопку "Отмена" знизу
+            sendMessageWithCancel(chatId, ""); // Пустий текст, просто щоб оновити нижню клаву
             try { execute(m); } catch (Exception e) {}
         }
+
         else if (data.startsWith("h_plant_")) processPlanting(chatId, Long.parseLong(data.split("_")[2]));
         else if (data.startsWith("h_water_")) processWateringConfirm(chatId, Long.parseLong(data.split("_")[2]));
         else if (data.startsWith("h_collect_")) processCollectingConfirm(chatId, Long.parseLong(data.split("_")[2]));
@@ -278,18 +289,19 @@ public class RadmirBot extends TelegramLongPollingBot {
                     ogorodRepository.save(oH1);
                     userStateMap.put(chatId, UserState.AWAITING_HARVEST_WATER_TIME);
 
-                    // КНОПКА "35" (ТУТ ВОНА Є)
+                    // КНОПКА "35" (Inline)
                     SendMessage mWater = new SendMessage();
                     mWater.setChatId(chatId);
                     mWater.setText("Введите интервал полива в минутах (целое число):");
-                    ReplyKeyboardMarkup mkWater = new ReplyKeyboardMarkup();
-                    mkWater.setResizeKeyboard(true);
-                    List<KeyboardRow> kbWater = new ArrayList<>();
-                    KeyboardRow rWater1 = new KeyboardRow(); rWater1.add("35");
-                    KeyboardRow rWater2 = new KeyboardRow(); rWater2.add("🔙 Отмена");
-                    kbWater.add(rWater1); kbWater.add(rWater2);
-                    mkWater.setKeyboard(kbWater);
+
+                    InlineKeyboardMarkup mkWater = new InlineKeyboardMarkup();
+                    List<List<InlineKeyboardButton>> rowsWater = new ArrayList<>();
+                    List<InlineKeyboardButton> rowWater = new ArrayList<>();
+                    rowWater.add(createBtn("35", "val_35"));
+                    rowsWater.add(rowWater);
+                    mkWater.setKeyboard(rowsWater);
                     mWater.setReplyMarkup(mkWater);
+
                     try { execute(mWater); } catch (Exception e) {}
                     break;
 
@@ -299,18 +311,19 @@ public class RadmirBot extends TelegramLongPollingBot {
                     ogorodRepository.save(oH2);
                     userStateMap.put(chatId, UserState.AWAITING_HARVEST_PRICE);
 
-                    // КНОПКА "193.950" (ТУТ ВОНА Є)
+                    // КНОПКА "193.950" (Inline)
                     SendMessage mPrice = new SendMessage();
                     mPrice.setChatId(chatId);
                     mPrice.setText("Введите прибыль за один сбор урожая:");
-                    ReplyKeyboardMarkup mkPrice = new ReplyKeyboardMarkup();
-                    mkPrice.setResizeKeyboard(true);
-                    List<KeyboardRow> kbPrice = new ArrayList<>();
-                    KeyboardRow rPrice1 = new KeyboardRow(); rPrice1.add("193.950");
-                    KeyboardRow rPrice2 = new KeyboardRow(); rPrice2.add("🔙 Отмена");
-                    kbPrice.add(rPrice1); kbPrice.add(rPrice2);
-                    mkPrice.setKeyboard(kbPrice);
+
+                    InlineKeyboardMarkup mkPrice = new InlineKeyboardMarkup();
+                    List<List<InlineKeyboardButton>> rowsPrice = new ArrayList<>();
+                    List<InlineKeyboardButton> rowPrice = new ArrayList<>();
+                    rowPrice.add(createBtn("193.950", "val_193.950"));
+                    rowsPrice.add(rowPrice);
+                    mkPrice.setKeyboard(rowsPrice);
                     mPrice.setReplyMarkup(mkPrice);
+
                     try { execute(mPrice); } catch (Exception e) {}
                     break;
 
@@ -658,7 +671,6 @@ public class RadmirBot extends TelegramLongPollingBot {
 
     private void startHarvestCycle(Long chatId) {
         List<Ogorod> ogorods = ogorodRepository.findAllByChatId(chatId);
-        // ЗМІНА: Дозволяємо садити, тільки якщо IDLE або NULL. Якщо READY (готовий) - садити не можна.
         List<Ogorod> available = ogorods.stream()
                 .filter(o -> o.getHarvestState() == null || o.getHarvestState().equals("IDLE"))
                 .collect(Collectors.toList());
@@ -780,17 +792,7 @@ public class RadmirBot extends TelegramLongPollingBot {
         sendMessage(chatId, sb.toString());
     }
 
-    // ТУТ ВСТАНОВЛЮЮТЬСЯ ПАРАМЕТРИ ЗА ЗАМОВЧУВАННЯМ
-    private void startAddingOgorod(Long chatId) {
-        userStateMap.put(chatId, UserState.AWAITING_OGOROD_NAME);
-        Ogorod o = new Ogorod();
-        // Встановлюємо дефолтні значення:
-        o.setGrowthTimeMinutes(170);   // 02:50 (2 * 60 + 50 = 170)
-        o.setWateringIntervalMinutes(35); // 35 min
-        o.setHarvestProfit(193950.0);  // 193.950
-        ogorodDraftMap.put(chatId, o);
-        sendMessageWithCancel(chatId, "Введите название огорода:");
-    }
+    private void startAddingOgorod(Long chatId) { userStateMap.put(chatId, UserState.AWAITING_OGOROD_NAME); ogorodDraftMap.put(chatId, new Ogorod()); sendMessageWithCancel(chatId, "Введите название огорода:"); }
     private void startDeletingOgorod(Long chatId) { sendMessageWithCancel(chatId, "Введите ID огорода для удаления (см. в Списке):"); userStateMap.put(chatId, UserState.AWAITING_OGOROD_DELETE_ID); }
     private void startEditingOgorod(Long chatId) { sendMessageWithCancel(chatId, "Введите ID огорода для редактирования:"); userStateMap.put(chatId, UserState.AWAITING_OGOROD_EDIT_ID); }
 
