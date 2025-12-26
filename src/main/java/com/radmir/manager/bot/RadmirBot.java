@@ -175,7 +175,14 @@ public class RadmirBot extends TelegramLongPollingBot {
             Long oid = Long.parseLong(data.split("_")[2]);
             harvestParamOgorodId.put(chatId, oid);
             userStateMap.put(chatId, UserState.AWAITING_HARVEST_GROWTH_TIME);
-            sendMessageWithCancel(chatId, "Введите время роста (ЧЧ:ММ), например 3:30");
+
+            // ЗМІНА: Додаємо кнопку "02:50"
+            SendMessage m = new SendMessage(); m.setChatId(chatId); m.setText("Введите время роста (ЧЧ:ММ), например 3:30\nИли нажмите кнопку:");
+            ReplyKeyboardMarkup mk = new ReplyKeyboardMarkup(); mk.setResizeKeyboard(true);
+            List<KeyboardRow> kb = new ArrayList<>();
+            KeyboardRow r1 = new KeyboardRow(); r1.add("02:50");
+            KeyboardRow r2 = new KeyboardRow(); r2.add("🔙 Отмена");
+            kb.add(r1); kb.add(r2); mk.setKeyboard(kb); m.setReplyMarkup(mk); try { execute(m); } catch (Exception e) {}
         }
         else if (data.startsWith("h_plant_")) processPlanting(chatId, Long.parseLong(data.split("_")[2]));
         else if (data.startsWith("h_water_")) processWateringConfirm(chatId, Long.parseLong(data.split("_")[2]));
@@ -263,14 +270,29 @@ public class RadmirBot extends TelegramLongPollingBot {
                     oH1.setGrowthTimeMinutes(growthMins);
                     ogorodRepository.save(oH1);
                     userStateMap.put(chatId, UserState.AWAITING_HARVEST_WATER_TIME);
-                    sendMessageWithCancel(chatId, "Введите интервал полива в минутах (целое число):");
+
+                    // ЗМІНА: Кнопка "35"
+                    SendMessage mWater = new SendMessage(); mWater.setChatId(chatId); mWater.setText("Введите интервал полива в минутах (целое число):");
+                    ReplyKeyboardMarkup mkWater = new ReplyKeyboardMarkup(); mkWater.setResizeKeyboard(true);
+                    List<KeyboardRow> kbWater = new ArrayList<>();
+                    KeyboardRow rWater1 = new KeyboardRow(); rWater1.add("35");
+                    KeyboardRow rWater2 = new KeyboardRow(); rWater2.add("🔙 Отмена");
+                    kbWater.add(rWater1); kbWater.add(rWater2); mkWater.setKeyboard(kbWater); mWater.setReplyMarkup(mkWater); try { execute(mWater); } catch (Exception e) {}
                     break;
+
                 case AWAITING_HARVEST_WATER_TIME:
                     Ogorod oH2 = ogorodRepository.findById(harvestParamOgorodId.get(chatId)).get();
                     oH2.setWateringIntervalMinutes(Integer.parseInt(text));
                     ogorodRepository.save(oH2);
                     userStateMap.put(chatId, UserState.AWAITING_HARVEST_PRICE);
-                    sendMessageWithCancel(chatId, "Введите прибыль за один сбор урожая:");
+
+                    // ЗМІНА: Кнопка "193.950"
+                    SendMessage mPrice = new SendMessage(); mPrice.setChatId(chatId); mPrice.setText("Введите прибыль за один сбор урожая:");
+                    ReplyKeyboardMarkup mkPrice = new ReplyKeyboardMarkup(); mkPrice.setResizeKeyboard(true);
+                    List<KeyboardRow> kbPrice = new ArrayList<>();
+                    KeyboardRow rPrice1 = new KeyboardRow(); rPrice1.add("193.950");
+                    KeyboardRow rPrice2 = new KeyboardRow(); rPrice2.add("🔙 Отмена");
+                    kbPrice.add(rPrice1); kbPrice.add(rPrice2); mkPrice.setKeyboard(kbPrice); mPrice.setReplyMarkup(mkPrice); try { execute(mPrice); } catch (Exception e) {}
                     break;
                 case AWAITING_HARVEST_PRICE:
                     Ogorod oH3 = ogorodRepository.findById(harvestParamOgorodId.get(chatId)).get();
@@ -762,10 +784,24 @@ public class RadmirBot extends TelegramLongPollingBot {
 
     private void startHarvestCycle(Long chatId) {
         List<Ogorod> ogorods = ogorodRepository.findAllByChatId(chatId);
-        List<Ogorod> available = ogorods.stream().filter(o -> o.getHarvestState() == null || o.getHarvestState().equals("IDLE") || o.getHarvestState().equals("READY")).collect(Collectors.toList());
-        if (available.isEmpty()) { sendMessage(chatId, "❌ Нет свободных огородов."); return; }
+        // ЗМІНА: Дозволяємо садити, тільки якщо IDLE або NULL. Якщо READY (готовий) - садити не можна.
+        List<Ogorod> available = ogorods.stream()
+                .filter(o -> o.getHarvestState() == null || o.getHarvestState().equals("IDLE"))
+                .collect(Collectors.toList());
+
+        if (available.isEmpty()) {
+            sendMessage(chatId, "❌ Нет свободных огородов (или урожай еще не собран).");
+            return;
+        }
+
         SendMessage msg = new SendMessage(); msg.setChatId(chatId); msg.setText("Какой огород посадили?");
-        InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>(); for (Ogorod o : available) { List<InlineKeyboardButton> r = new ArrayList<>(); r.add(createBtn(o.getTitle(), "h_plant_" + o.getId())); rows.add(r); } mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch (Exception e) {}
+        InlineKeyboardMarkup mk = new InlineKeyboardMarkup(); List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        for (Ogorod o : available) {
+            List<InlineKeyboardButton> r = new ArrayList<>();
+            r.add(createBtn(o.getTitle(), "h_plant_" + o.getId()));
+            rows.add(r);
+        }
+        mk.setKeyboard(rows); msg.setReplyMarkup(mk); try { execute(msg); } catch (Exception e) {}
     }
     private void processPlanting(Long chatId, Long ogId) {
         Ogorod o = ogorodRepository.findById(ogId).get();
